@@ -1,0 +1,28 @@
+# Virtual environments
+.venv/
+venv/
+
+# Python cache & compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Test & coverage outputs
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+
+# Env & local config
+.env
+.env.*
+.DS_Store
+
+# OS trash
+Thumbs.db

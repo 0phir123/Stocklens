@@ -1,0 +1,5 @@
+adapters
+api
+core
+services
+shared
