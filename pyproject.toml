@@ -1,7 +1,6 @@
 [tool.setuptools]
 package-dir = {"" = "."}
 
-
 [tool.setuptools.packages.find]
 include = ["api*", "core*", "shared*", "adapters*", "services*"]
 
@@ -16,13 +15,11 @@ dependencies = [
   "uvicorn[standard]>=0.30.0",
   "pydantic>=2.7.0",
   "python-dotenv>=1.0.1",
-  "httpx>=0.27.0",
   "loguru>=0.7.2",
   "orjson>=3.10.0",
   "redis>=5.0.0",
   "pydantic-settings>=2.3.0",
   "httpx>=0.27,<0.28"
-
 ]
 
 [project.optional-dependencies]
@@ -50,6 +47,11 @@ strict = true
 warn_unused_ignores = true
 disallow_untyped_defs = true
 exclude = ["legacy/"]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["fastapi.*", "httpx.*", "pytest.*", "pydantic_settings.*"]
+ignore_missing_imports = true
 
 [build-system]
 requires = ["setuptools", "wheel"]
