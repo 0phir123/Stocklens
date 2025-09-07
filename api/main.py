@@ -2,7 +2,7 @@ from __future__ import annotations
 import time
 import uuid
 from contextvars import ContextVar
-from typing import Any, Callable, Awaitable
+from typing import Callable, Awaitable
 
 from starlette.requests import Request
 from starlette.responses import Response
@@ -14,6 +14,8 @@ from shared.logging import setup_logging
 from loguru import logger
 
 from api.routers.insights import router as insights_router
+from api.routers.agent import router as agent_router
+
 
 # Context var to store a per-request id (safe for async)
 request_id_ctx: ContextVar[str] = ContextVar("request_id", default="-")
@@ -72,6 +74,8 @@ def create_app() -> FastAPI:
 
     # 5) mount your routers
     app.include_router(insights_router)
+    app.include_router(agent_router)
+
     # when you add the agent router later: app.include_router(agent_router)
 
     logger.info("application startup complete")
@@ -79,11 +83,3 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-
-
-# (Optional temp) stub agent endpoint—keep until you add the real router
-async def agent_ask(q: str) -> dict[str, Any]:
-    return {"answer": f"(stub) you asked: {q}"}
-
-
-app.add_api_route("/v1/agent/ask", agent_ask, methods=["GET"])
