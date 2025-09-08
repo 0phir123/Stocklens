@@ -1,21 +1,38 @@
-from __future__ import annotations  # lazy annotations
+# File: shared/di.py
+from __future__ import annotations
+from typing import Union
+from shared.config import settings, load_validation_policy
+from services.metrics_service import MetricsService
+from services.validation_service import ValidationService
 
 from adapters.metrics.dummy_market_provider import DummyMarketDataAdapter
+from adapters.metrics.yahoo_market_provider import YahooMarketDataAdapter
+from adapters.metrics.fred_metrics_provider import FREDAsMarketDataAdapter
+from adapters.metrics.composite_market_provider import CompositeMarketDataAdapter
 
-# ^ import the concrete adapter *we choose to use now*
-
-from services.metrics_service import MetricsService  # import the service type
-
-_market_adapter = DummyMarketDataAdapter()  # build a singleton adapter instance
-# ^ global module-level variables act as simple singletons in this minimal setup
-
-_metrics_service = MetricsService(
-    market_port=_market_adapter
-)  # inject adapter into service (constructor injection)
+validation_service = ValidationService(load_validation_policy())
 
 
-def get_metrics_service() -> MetricsService:  # expose a getter for routes (or FastAPI Depends)
+def _build_market_underlier() -> Union[DummyMarketDataAdapter, YahooMarketDataAdapter]:
+    if settings.use_dummy_market:
+        return DummyMarketDataAdapter()
+    return YahooMarketDataAdapter()
+
+
+_market_underlier = _build_market_underlier()
+_fred_as_market = FREDAsMarketDataAdapter()
+
+_composite = CompositeMarketDataAdapter(
+    market_adapter=_market_underlier,
+    fred_adapter=_fred_as_market,
+)
+
+_metrics_service = MetricsService(market_port=_composite)
+
+
+def get_metrics_service() -> MetricsService:
     return _metrics_service
 
 
-# ^ if you want to swap providers globally later, change the instantiation above (1 place only)
+def get_validation_service() -> ValidationService:
+    return validation_service  # reuse the singleton built above

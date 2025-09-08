@@ -1,3 +1,4 @@
+# File: core/metrics/entities.py
 from __future__ import annotations  # FUTURE IMPORT
 
 # ^ Syntax: must be at top of file.

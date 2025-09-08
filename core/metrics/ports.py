@@ -1,3 +1,4 @@
+# File: core/metrics/ports.py
 from __future__ import annotations  # lazy type hints (see above)
 
 from typing import Protocol, Optional, runtime_checkable  # import typing helpers
@@ -5,6 +6,7 @@ from typing import Protocol, Optional, runtime_checkable  # import typing helper
 # Protocol: define structural interfaces (duck-typed)
 # Optional[T]: T or None
 # runtime_checkable: allows isinstance(x, ThisProtocol) at runtime
+
 
 from datetime import date  # date type for parameters
 from .entities import Series  # import domain type alias for return type

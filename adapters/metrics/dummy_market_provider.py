@@ -1,3 +1,4 @@
+# File: adapters/metrics/dummy_market_provider.py
 from __future__ import annotations  # lazy annotations
 
 from datetime import date, timedelta  # 'date' for today; 'timedelta' for stepping days

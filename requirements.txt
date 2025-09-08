@@ -28,3 +28,8 @@ uvloop==0.21.0 ; sys_platform != "win32" and sys_platform != "cygwin" and platfo
 watchfiles==1.1.0 ; python_version >= "3.10"
 websockets==15.0.1 ; python_version >= "3.10"
 win32-setctime==1.2.0 ; python_version >= "3.10" and sys_platform == "win32"
+pandas>=2.2
+pandas-datareader>=0.10
+yfinance>=0.2.27
+fredapi>=0.4.3
+pyyaml>=6.0

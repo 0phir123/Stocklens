@@ -1,4 +1,4 @@
-# shared/logging.py
+# File: shared/logging.py
 from __future__ import annotations
 import logging
 import sys

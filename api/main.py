@@ -1,3 +1,4 @@
+# File: api/main.py
 from __future__ import annotations
 import time
 import uuid
@@ -13,7 +14,7 @@ from shared.config import settings
 from shared.logging import setup_logging
 from loguru import logger
 
-from api.routers.insights import router as insights_router
+from api.routers.fetch_data import router as fetch_data_router
 from api.routers.agent import router as agent_router
 
 
@@ -73,7 +74,7 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     # 5) mount your routers
-    app.include_router(insights_router)
+    app.include_router(fetch_data_router)
     app.include_router(agent_router)
 
     # when you add the agent router later: app.include_router(agent_router)

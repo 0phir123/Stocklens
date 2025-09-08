@@ -1,0 +1,94 @@
+# Data Validation Policy (Validator v1)
+# Aligns with config/optimal_parameters.yaml:data_quality, adds freshness + gaps.
+
+# =============================================================================
+# METADATA
+# =============================================================================
+version: "1.0.0"
+last_updated: "2025-09-08"
+validator_version: "v1"
+
+# =============================================================================
+# REQUIREMENTS (aligned with optimal_parameters.data_quality)
+# =============================================================================
+requirements:
+  # History sufficiency
+  min_history:
+    monthly_months: 60        # mirrors optimal_parameters.data_quality.min_history_months
+    daily_days: 30           # validator-specific default for D series
+
+  # Missing data tolerance (same semantic as optimal_parameters.monitoring.missing_data_alert_threshold)
+  missing_data_alert_threshold: 0.05
+
+# =============================================================================
+# GAP & FRESHNESS (validator-only)
+# =============================================================================
+gaps:
+  max_gap_days_daily: 5       # >5d between consecutive D points counts as a gap
+  max_long_gaps_allowed: 3    # >3 long gaps => invalid
+
+freshness_days_by_key:
+  macro.gdp: 90
+  macro.cpi: 45
+  macro.baa: 7
+  defaults:
+    daily: 2
+    monthly: 60
+    quarterly: 120
+
+# =============================================================================
+# BOUNDS (values aligned from optimal_parameters.data_quality)
+# =============================================================================
+# Level bounds (use sparingly; prefer change bounds for trending series)
+bounds_by_key:
+  macro.baa: [0.5, 25.0]      # from baa_yield_bounds
+
+# Change/growth bounds (derived from *_growth_bounds & inflation_bounds)
+change_bounds:
+  yoy:
+    macro.gdp: [-10.0, 15.0]  # from gdp_growth_bounds (YoY %)
+    macro.cpi: [-5.0, 20.0]   # from inflation_bounds (YoY %)
+  delta:
+    macro.baa: [-2.5, 2.5]    # per-period Δ in %-pts deemed large (operational)
+
+# =============================================================================
+# OUTLIER DETECTION (z-score thresholds aligned)
+# =============================================================================
+zscore_thresholds:
+  inflation_yoy: 2.5          # from inflation_outlier_threshold
+  baa_delta: 3.0              # from baa_yield_outlier_threshold
+  # Optionally add: gdp_yoy: 3.0   # from gdp_outlier_threshold (if needed)
+
+# =============================================================================
+# CLEANING BEHAVIOR (validator-only)
+# =============================================================================
+cleaning:
+  drop_nan_inf: true
+  keep_last_on_duplicate_ts: true
+  sort_ascending: true
+
+# =============================================================================
+# SEVERITY RULES (validator-only)
+# =============================================================================
+severity:
+  invalid_if:
+    - empty_after_clean
+    - insufficient_history
+    - catastrophic_gaps
+  warn_if:
+    - stale_data
+    - out_of_bounds_low_pct
+    - many_removed_points
+
+# =============================================================================
+# METRICS TO INCLUDE IN REPORT (validator-only)
+# =============================================================================
+metrics:
+  include:
+    - total_observations_in
+    - total_observations_out
+    - removed_nan_inf
+    - gaps_count
+    - latest_ts
+    - days_old
+    - outliers_count
