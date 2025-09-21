@@ -8,7 +8,7 @@ import faiss
 import numpy as np
 
 
-class FaissStore(TypedDict):
+class FaissStore():
     """
     Flat Inner-Product FAISS index (cosine when vectors are L2-normalized).
 

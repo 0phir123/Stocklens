@@ -1,0 +1,79 @@
+{
+  "40_troubleshooting::w0": {
+    "path": "40_troubleshooting.txt",
+    "ext": ".txt",
+    "loader": "text",
+    "strategy": "fixed_window",
+    "window": "1200",
+    "overlap": "150",
+    "doc_id": "40_troubleshooting",
+    "chunk_id": "40_troubleshooting::w0",
+    "text": "Troubleshooting:\n- \"Unknown tool\": the registry doesn’t have that name — check registration.\n- \"No matches\": index exists, but query didn’t hit; try a more specific phrase.\n- Load failures: index directory missing or model/dimension mismatch. Rebuild with `scripts/ingest_docs.py`."
+  },
+  "50::w0": {
+    "path": "50.txt",
+    "ext": ".txt",
+    "loader": "text",
+    "strategy": "fixed_window",
+    "window": "1200",
+    "overlap": "150",
+    "doc_id": "50",
+    "chunk_id": "50::w0",
+    "text": "Paris is the capital of France. The Eiffel Tower is in Paris"
+  },
+  "60::w0": {
+    "path": "60.txt",
+    "ext": ".txt",
+    "loader": "text",
+    "strategy": "fixed_window",
+    "window": "1200",
+    "overlap": "150",
+    "doc_id": "60",
+    "chunk_id": "60::w0",
+    "text": "Tokyo is the capital of Japan. Mount Fuji is near Tokyo"
+  },
+  "00_welcome::w0": {
+    "path": "00_welcome.md",
+    "ext": ".md",
+    "loader": "text",
+    "strategy": "fixed_window",
+    "window": "1200",
+    "overlap": "150",
+    "doc_id": "00_welcome",
+    "chunk_id": "00_welcome::w0",
+    "text": "# StockLens Demo Corpus (RAG v0)\nThis mini corpus exists to exercise the retrieval tool. The loader reads `.txt` and `.md` recursively from a folder, the chunker splits by characters with overlap, the embedder is SBERT (all-MiniLM-L6-v2), and the vector store is FAISS (IndexFlatIP with L2-normalized vectors)."
+  },
+  "10_metrics_keys::w0": {
+    "path": "10_metrics_keys.md",
+    "ext": ".md",
+    "loader": "text",
+    "strategy": "fixed_window",
+    "window": "1200",
+    "overlap": "150",
+    "doc_id": "10_metrics_keys",
+    "chunk_id": "10_metrics_keys::w0",
+    "text": "# Macro Metrics Keys (Finance Demo)\n- **macro.gdp** → FRED `GDPC1` (real GDP, quarterly native). If monthly is requested, derive by **linear interpolation** from quarterly and align to **month-end**.\n- **macro.cpi** → FRED `CPIAUCSL` (monthly native, align to month-end).\n- **macro.baa** → FRED `BAA` (daily → **monthly mean**, align to month-end). Alias: `macro.baa_yield`.\n\nResampling rules (adapter):\n- Request **D** → pad/ffill to calendar days.\n- Request **M** → month-end value (`.last()`).\n- Request **Q** → quarter-end value, timestamped to month-end of the quarter."
+  },
+  "20_rag_pipeline::w0": {
+    "path": "20_rag_pipeline.md",
+    "ext": ".md",
+    "loader": "text",
+    "strategy": "fixed_window",
+    "window": "1200",
+    "overlap": "150",
+    "doc_id": "20_rag_pipeline",
+    "chunk_id": "20_rag_pipeline::w0",
+    "text": "# RAG Pipeline (This Repo)\n- **Loader**: `TextFolderLoader` reads `.txt`/`.md`, emits `LoadedDoc(doc_id, text, meta)`.\n- **Chunker**: `FixedWindowChunker(window=1200, overlap=150)` → `DocChunk(chunk_id, text, meta)`.\n- **Embedder**: `SBertEmbedder(\"sentence-transformers/all-MiniLM-L6-v2\")` (dim=384, normalized).\n- **Vector store**: `FaissStore(IndexFlatIP)`, cosine via inner product on unit vectors.\n- **Persistence** under `var/index/<name>/`:\n  - `index.faiss`, `id_map.json` (row→chunk_id), `meta_map.json` (chunk_id→meta incl. snippet), `config.json` (dim/metric).\n- **Retrieve**: tool embeds the query, searches top-k, returns `[path] + snippet + score`."
+  },
+  "30_api_usage::w0": {
+    "path": "30_api_usage.md",
+    "ext": ".md",
+    "loader": "text",
+    "strategy": "fixed_window",
+    "window": "1200",
+    "overlap": "150",
+    "doc_id": "30_api_usage",
+    "chunk_id": "30_api_usage::w0",
+    "text": "# API Usage\n- Retrieve: `GET /v1/agent/ask?tool=retrieve_docs&q=your+question`\n- Prices: `GET /v1/fetch_data/prices?symbol=SPY&freq=D`\n- Prices + validation: `GET /v1/fetch_data/prices_with_validation?symbol=macro.cpi&freq=M`\nNotes: tools are registered in the agent registry; `retrieve_docs` loads its index from `var/index/<name>/` (default: `default`)."
+  }
+}
