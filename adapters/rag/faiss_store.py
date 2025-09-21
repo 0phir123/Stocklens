@@ -8,7 +8,7 @@ import faiss
 import numpy as np
 
 
-class FaissStore():
+class FaissStore:
     """
     Flat Inner-Product FAISS index (cosine when vectors are L2-normalized).
 
@@ -61,9 +61,9 @@ class FaissStore():
             chunk_id = self.id_map[idx]
             out.append(
                 {
-                    "id": chunk_id,                          # ← matches VectorStore port
+                    "id": chunk_id,  # ← matches VectorStore port
                     "score": float(scores[0][rank]),
-                    "meta": self.meta_map.get(chunk_id, {}), # ← matches VectorStore port
+                    "meta": self.meta_map.get(chunk_id, {}),  # ← matches VectorStore port
                 }
             )
         return out
