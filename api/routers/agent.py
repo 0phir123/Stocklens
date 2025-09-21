@@ -5,6 +5,8 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from shared.di import get_metrics_service
+from core.agent.tools.retrieve_docs import RetrieveDocsTool
+
 
 router = APIRouter(prefix="/v1/agent", tags=["agent"])
 
@@ -19,7 +21,7 @@ class AskResponseDTO(BaseModel):
     tool: str
 
 
-# ---------- Command Protocol ----------
+# ---------- Command Protocol (Interface)----------
 class ToolCommand(Protocol):
     name: str
 
@@ -72,6 +74,7 @@ class ToolRegistry:
 registry = ToolRegistry()
 registry.register(EchoTool())
 registry.register(PricesTool())  # DI inside constructor
+registry.register(RetrieveDocsTool(index_name="default"))
 
 
 # ---------- Route ----------

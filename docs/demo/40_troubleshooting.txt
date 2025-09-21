@@ -1,0 +1,4 @@
+Troubleshooting:
+- "Unknown tool": the registry doesn’t have that name — check registration.
+- "No matches": index exists, but query didn’t hit; try a more specific phrase.
+- Load failures: index directory missing or model/dimension mismatch. Rebuild with `scripts/ingest_docs.py`.
