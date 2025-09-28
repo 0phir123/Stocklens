@@ -1,131 +1,149 @@
-﻿# StockLens — AI Backend (Agents + RAG + Insights API)
+# StockLens 🧠📈  
+> **Modular AI backend** for insights, metrics, and RAG—built to demonstrate production-style architecture, not just a demo script.
 
-Production-style FastAPI backend with clean architecture (Ports/Adapters/Services), ready for agents, RAG, metrics, and finance analytics.
+[![CI](https://img.shields.io/badge/CI-GitHub_Actions-informational)]()
+[![API](https://img.shields.io/badge/API-FastAPI-009688)]()
+[![Vector](https://img.shields.io/badge/Vector-FAISS-2962FF)]()
+[![Cache](https://img.shields.io/badge/Cache-Redis-DC382D)]()
 
-## Why
-- Ship **maintainable** backends (SOLID, DI, tests, lint, type).
-- Add domain logic via **adapters** without touching the core.
-- Ready for **observability**, **caching**, and **CI/CD**.
-
-## Architecture
-api/ # FastAPI (controllers/routers only)
-core/ # pure domain: ports (Protocols), entities, errors
-services/ # application use-cases (compose ports)
-adapters/ # infrastructure: providers, clients, storage
-shared/ # config, logging, DI
-tests/ # pytest: api, services, adapters
-
-shell
-Copy code
-
-## Quickstart (local venv)
-```bash
-python -m venv .venv
-# mac/linux: source .venv/bin/activate
-# windows:   .\.venv\Scripts\Activate.ps1
-
-pip install --upgrade pip
-pip install -e ".[dev]"
-
-# run tests
-pytest -q
-
-# run api (dev)
-uvicorn api.main:app --reload
-# -> http://localhost:8000/healthz
-Pre-commit (format/lint/type on every commit)
-bash
-Copy code
-pip install pre-commit
-pre-commit install
-pre-commit run --all-files
-Dev via Docker & Compose (hot reload)
-bash
-Copy code
-docker compose up --build
-# -> http://localhost:8000/healthz
-API (early skeleton)
-GET /healthz → {"status":"ok"}
-
-GET /v1/agent/ask?q=... → stub echo
-
-(Week 2 adds /v1/insights/metrics/* with OOP ports/services/adapters.)
-
-Workflow (Git)
-Branches: main (green), feature/*
-
-Commits: Conventional (feat, fix, chore, test, …)
-
-CI: ruff + black + mypy + pytest (GitHub Actions)
-
-Roadmap (high level)
-Week 1: repo, tests, pre-commit, Docker dev
-
-Week 2: OOP metrics port/service + finance adapters
-
-Week 3: observability + caching
-
-Week 4: CI/CD + hardened Docker + K8s
-
-Week 5: analytics/backtests endpoints (integrate your scripts)
-
-Week 6: security + UX + write-up
-
-License
-TBD
-
-bash
-Copy code
+## ✨ Why this project matters (for reviewers)
+- **Clear boundaries**: Ports & Adapters; pure domain in `core/`; infra in `adapters/`.
+- **Swapability**: replace finance adapters (FRED/Yahoo) with a dummy without touching routes.
+- **Operational realism**: caching, retries, validation, observability, CI/CD, containers.
+- **LLM done right**: tool-routed agent, RAG with citations, JSON-schema outputs + validator fallback.
 
 ---
+## ✨ Why this project matters
+- **Clear boundaries**: Ports & Adapters; pure domain in `core/`; infra in `adapters/`.
+- **Swapability**: replace finance adapters (FRED/Yahoo) with a dummy without touching routes.
+- **Operational realism**: caching, retries, validation, observability, CI/CD, containers.
+- **LLM done right**: tool-routed agent, RAG with citations, JSON-schema outputs + validator fallback.
 
-# Step 7 — Dev Docker & Compose (reposted, concise)
+## ✨ Why this project matters
+- **Clear boundaries**: Ports & Adapters; pure domain in `core/`; infra in `adapters/`.
+- **Swapability**: replace finance adapters (FRED/Yahoo) with a dummy without touching routes.
+- **Operational realism**: caching, retries, validation, observability, CI/CD, containers.
+- **LLM done right**: tool-routed agent, RAG with citations, JSON-schema outputs + validator fallback.
 
-## `Dockerfile.dev`
-```dockerfile
-FROM python:3.11-slim
+## 🟡 Project status (honest snapshot)
+**Working now**
+- Market & macro data fetching via adapters (e.g., Yahoo Finance, FRED) for core series.
+- Basic RAG pipeline: chunk → embed → FAISS retrieve → synthesize (cited response).
+- API skeleton with `/healthz`, `/v1/agent/ask`, `/v1/insights/metrics/*`.
 
-WORKDIR /app
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+**Not yet implemented / In progress**
+- Oservability, Prometheus metrics, Redis cache strategy, screener stub..
+- Integrate enhanced FE, regimes, backtests, optimizer; analytics endpoints.
+- Smarter article ingestion (crawler/feeds, dedupe, metadata enrichment).
+- LLM tool that makes **outbound requests** autonomously (safe router + budget caps).
+- hardened Docker, CI/CD, K8s/Helm
+- Security (JWT, rate limits), UX polish, SECURITY.md, demo script 
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-  && rm -rf /var/lib/apt/lists/*
+  
+**Notes**
+- Active development; public API may evolve.
+- Adapters are swappable—infra can be replaced without touching domain routes.
+  
+## 🏗 Architecture (high level)
 
-COPY pyproject.toml ./
-RUN pip install --upgrade pip uv && uv pip install -e ".[dev]"
+```
+flowchart LR
+  Client[(Client / UI)] -->|HTTP JSON| API[FastAPI Controllers / DTOs]
+  subgraph Application Layer
+    SVC[services/* Use-Cases]
+  end
+  subgraph Domain (Pure)
+    CORE[core/* domain + agents + rag + metrics + errors]
+  end
+  subgraph Infrastructure (Adapters)
+    VEC[adapters/vector/faiss]
+    RED[adapters/cache/redis]
+    FRED[adapters/providers/fred]
+    YF[yfinance adapter]
+    DB[(Postgres)]
+  end
 
-COPY . .
+  API --> SVC --> CORE
+  CORE <---> VEC
+  CORE <---> RED
+  CORE <---> FRED
+  CORE <---> YF
+  SVC --> DB
 
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-docker-compose.yml
-yaml
-Copy code
-version: "3.9"
-services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    ports:
-      - "8000:8000"
-    volumes:
-      - .:/app
-    environment:
-      - PYTHONPATH=/app
-      - LOG_LEVEL=INFO
-      - REDIS_URL=redis://redis:6379/0
-    depends_on:
-      - redis
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-Run
-bash
-Copy code
-docker compose up --build
-# open http://localhost:8000/healthz
+api/ → FastAPI controllers & request/response models
+core/ → domain logic (agent router, RAG, metrics, errors)
+services/ → orchestration, use-cases, transactions
+adapters/ → infra impls (FRED, yfinance, FAISS, Redis, Postgres)
+shared/ → config, logging, DI container, utils
+tests/ → pytest (unit, snapshot, property-based)
+
+```
+## 🤖 Agent & Router Flow (RAG + Metrics)
+Router chooses RAG or Metrics (or other tools) via policy.
+
+- RAG: chunking → embeddings → FAISS → synthesis with citations.
+
+- Metrics: provider port (FRED/Yahoo) → resample/interp strategies → typed DTO.
+
+- Guardrails: token budgets, schema validation, prompt-injection mitigations.
+
+
+## 🚀 Quick Start
+
+
+**Requirements:** Docker + Docker Compose (recommended), or Python 3.11+
+
+```bash
+# Clone
+git clone https://github.com/<your-user>/stocklens.git
+cd stocklens
+
+# Dev stack: API + Redis + Postgres (+ optional FAISS volume)
+docker-compose up --build
+
+# Open docs:
+# http://localhost:8000/docs
+
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt  # or: poetry install
+uvicorn api.main:app --reload
+```
+
+## 📡 Example Endpoints
+
+## 📡 Example Endpoints
+
+| Purpose        | Method & Path                                                | Notes                                       |
+|----------------|---------------------------------------------------------------|---------------------------------------------|
+| Health         | `GET /healthz`                                               | liveness                                    |
+| Ask Agent      | `POST /v1/agent/ask`                                         | body: `{ "question": "US GDP growth 2020?" }` |
+| Metrics        | `GET /v1/insights/metrics/{series_key}?start=...&end=...`    | e.g., `macro.gdp_real_q`                    |
+| Retrieve (RAG) | `POST /v1/insights/retrieve`                                 | natural language query → cited snippets     |
+
+
+
+
+## ✅ Quality & Ops
+
+- **Code Quality**: ruff, black, mypy; pre-commit hooks.
+- **Testing**: pytest (unit, snapshot, property-based); mark network tests.
+- **Caching**: Redis (TTL + stampede control).
+- **Resilience**: timeouts, retries/backoff, circuit breaker.
+- **Security**: JWT/API keys, rate limits, CORS, input sanitization, PI mitigations.
+- **Observability**: structured logs (correlation IDs), OpenTelemetry traces (API + nodes), Prometheus (p95, error rate, cache hits).
+- **CI/CD**: GitHub Actions → lint → typecheck → tests → build → container scan.
+
+## 🔌 Providers & Ports (Finance demo)
+
+- `MarketDataPort` & `MacroDataPort` with **adapters**:
+- **FREDProvider**: GDP (GDPC1), CPI (CPIAUCSL), BAA spreads (resample M/Q).
+ - **YahooFinanceProvider**: SPY, ^GSPC, TLT, GLD, SLV (adj close; monthly).
+- Swap to a **DummyProvider** for tests/offline—no API changes required.
+
+
+## 👤 Author
+
+**Ophir Ackerman** — AI-Backend / Python / Infra  
+LinkedIn: https://www.linkedin.com/in/ophir-ackerman  
+Email: ophirackerman@gmail.com
