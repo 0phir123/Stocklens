@@ -1,28 +1,36 @@
 # File: core/metrics/entities.py
-from __future__ import annotations  # FUTURE IMPORT
+"""
+Domain entities for time series.
 
-# ^ Syntax: must be at top of file.
-#   Semantics: store type annotations as strings (lazy), avoiding circular-import issues
-#   and speeding imports. Lets you reference types before they're defined.
+Defines:
+- SeriesPoint: an immutable (date, value) data point.
+- Series: a type alias for a list of SeriesPoint items.
+"""
 
-from dataclasses import dataclass  # import the dataclass decorator
+from __future__ import annotations
 
-# ^ Semantics: @dataclass auto-generates __init__, __repr__, __eq__, etc. for simple "record" classes.
-
-from datetime import date  # import the 'date' type (calendar day)
-
-# ^ Semantics: we'll annotate a field with this, e.g., when the price was recorded.
-
-from typing import List  # generic List type for type hints (List[T])
-
-# ^ Semantics: static typing only; does not affect runtime behavior.
+# Standard library
+from dataclasses import dataclass
+from datetime import date
+from typing import List
 
 
-@dataclass(frozen=True)  # declare a dataclass; frozen=True makes instances immutable & hashable
+@dataclass(frozen=True)
 class SeriesPoint:
-    when: date  # field 'when' must be a datetime.date (syntax: name: type)
-    value: float  # field 'value' must be a float number
+    """
+    Atomic time-series data point.
+
+    Attributes
+    ----------
+    when :
+        Calendar date of the observation.
+    value :
+        Numeric value associated with the date.
+    """
+
+    when: date
+    value: float
 
 
-Series = List[SeriesPoint]  # type alias: 'Series' means 'List of SeriesPoint'
-# ^ Semantics: improves readability of function signatures elsewhere (domain-friendly name).
+# Type alias: a time series is a list of points.
+Series = List[SeriesPoint]

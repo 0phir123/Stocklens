@@ -1,21 +1,47 @@
+# File: adapters/metrics/yahoo_market_provider.py
+"""
+Yahoo Finance–backed market data adapter.
+
+This module implements `MarketDataPort` using `yfinance`. It downloads daily,
+auto-adjusted prices and resamples to the requested frequency (D/M/Q), returning
+domain `SeriesPoint` items sorted by date and deduplicated.
+
+Notes
+-----
+- Uses `settings.data_start` / `settings.data_end` as defaults when start/end
+  are not provided.
+- For symbols with multi-indexed columns, prefers 'Adj Close' then 'Close'.
+"""
+
 from __future__ import annotations
 
-# Block overview:
-# - Implements MarketDataPort using yfinance.
-# - Downloads daily auto-adjusted prices, then resamples to D/M/Q.
-# - Returns domain Series (list[SeriesPoint]), sorted & deduped.
-
+# Standard library
 from datetime import date
-from typing import Optional, List
+from typing import List
+from typing import Optional
+
+# Third-party
 import pandas as pd
 import yfinance as yf
 
+# Local application
+from core.metrics.entities import Series
+from core.metrics.entities import SeriesPoint
 from core.metrics.ports import MarketDataPort
-from core.metrics.entities import SeriesPoint, Series
 from shared.config import settings
 
 
 class YahooMarketDataAdapter(MarketDataPort):
+    """
+    Market data adapter that retrieves price series via Yahoo Finance.
+
+    Workflow:
+      1. Download daily auto-adjusted prices.
+      2. Normalize to a single 'value' column (Adj Close preferred).
+      3. Resample to D/M/Q.
+      4. Slice by start/end if provided.
+      5. Return as a list of `SeriesPoint` (sorted, deduplicated).
+    """
 
     def get_adjusted_close(
         self,
@@ -24,6 +50,30 @@ class YahooMarketDataAdapter(MarketDataPort):
         end: Optional[date] = None,
         freq: str = "D",
     ) -> Series:
+        """
+        Retrieve an adjusted close-like series for a Yahoo symbol.
+
+        Parameters
+        ----------
+        symbol:
+            Ticker symbol understood by Yahoo Finance.
+        start:
+            Optional start date (inclusive).
+        end:
+            Optional end date (inclusive).
+        freq:
+            Output frequency: "D", "M", or "Q".
+
+        Returns
+        -------
+        Series
+            A list of `SeriesPoint` entries sorted by date.
+
+        Raises
+        ------
+        ValueError
+            If symbol is empty, date range is invalid, or `freq` is not D/M/Q.
+        """
         # ---- guardrails ----
         if not symbol:
             raise ValueError("symbol is required")
@@ -68,7 +118,6 @@ class YahooMarketDataAdapter(MarketDataPort):
 
         s = pd.Series(s, name="value")
         s.index = pd.to_datetime(s.index)
-
         # ---- resample to target D/M/Q ----
         if f == "D":
             rs = s.asfreq("D", method="pad")  # pad gaps to calendar days

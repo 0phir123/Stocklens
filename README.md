@@ -1,4 +1,4 @@
-# StockLens 🧠📈  
+# StockLens 🧠📈
 > **Modular AI backend** for insights, metrics, and RAG—built to demonstrate production-style architecture, not just a demo script.
 
 [![CI](https://img.shields.io/badge/CI-GitHub_Actions-informational)]()
@@ -37,13 +37,13 @@
 - Smarter article ingestion (crawler/feeds, dedupe, metadata enrichment).
 - LLM tool that makes **outbound requests** autonomously (safe router + budget caps).
 - hardened Docker, CI/CD, K8s/Helm
-- Security (JWT, rate limits), UX polish, SECURITY.md, demo script 
+- Security (JWT, rate limits), UX polish, SECURITY.md, demo script
 
-  
+
 **Notes**
 - Active development; public API may evolve.
 - Adapters are swappable—infra can be replaced without touching domain routes.
-  
+
 ## 🏗 Architecture (high level)
 
 ```
@@ -144,6 +144,6 @@ uvicorn api.main:app --reload
 
 ## 👤 Author
 
-**Ophir Ackerman** — AI-Backend / Python / Infra  
-LinkedIn: https://www.linkedin.com/in/ophir-ackerman  
+**Ophir Ackerman** — AI-Backend / Python / Infra
+LinkedIn: https://www.linkedin.com/in/ophir-ackerman
 Email: ophirackerman@gmail.com

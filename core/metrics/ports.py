@@ -1,25 +1,58 @@
 # File: core/metrics/ports.py
-from __future__ import annotations  # lazy type hints (see above)
+"""
+Ports (interfaces) for metrics domain.
 
-from typing import Protocol, Optional, runtime_checkable  # import typing helpers
+Exposes:
+- MarketDataPort: structural interface for adapters that provide adjusted-close
+  time series for a given symbol and optional date range/frequency.
+"""
 
-# Protocol: define structural interfaces (duck-typed)
-# Optional[T]: T or None
-# runtime_checkable: allows isinstance(x, ThisProtocol) at runtime
+from __future__ import annotations
+
+# Standard library
+from datetime import date
+from typing import Optional
+from typing import Protocol
+from typing import runtime_checkable
+
+# Local application
+from .entities import Series
 
 
-from datetime import date  # date type for parameters
-from .entities import Series  # import domain type alias for return type
+@runtime_checkable
+class MarketDataPort(Protocol):
+    """
+    Interface for market data providers that can return adjusted-close series.
 
-# ^ Relative import: '.' means current package (core/metrics)
+    Implementations should fetch a price-like series for the given `symbol`,
+    optionally constrained by `start`/`end` dates and resampled to the desired
+    `freq` ("D" daily, "M" monthly, "Q" quarterly).
+    """
 
+    def get_adjusted_close(
+        self,
+        symbol: str,
+        start: Optional[date] = None,
+        end: Optional[date] = None,
+        freq: str = "D",
+    ) -> Series:
+        """
+        Retrieve an adjusted close-like time series.
 
-@runtime_checkable  # enable runtime isinstance checks on this Protocol
-class MarketDataPort(Protocol):  # define a Protocol (interface) named MarketDataPort
-    def get_adjusted_close(  # method signature the port guarantees exists
-        self,  # instance method ('self' is required by Python)
-        symbol: str,  # ticker symbol (required string)
-        start: Optional[date] = None,  # optional start date; default None = no lower bound
-        end: Optional[date] = None,  # optional end date; default None = no upper bound
-        freq: str = "D",  # frequency hint: "D" daily, "M" monthly, "Q" quarterly
-    ) -> Series: ...  # returns a Series (our domain list of points); '...' = stub body
+        Parameters
+        ----------
+        symbol:
+            Ticker or key recognized by the implementation.
+        start:
+            Optional start date (inclusive).
+        end:
+            Optional end date (inclusive).
+        freq:
+            Output frequency: "D", "M", or "Q".
+
+        Returns
+        -------
+        Series
+            A list of `SeriesPoint` entries sorted by date.
+        """
+        ...
