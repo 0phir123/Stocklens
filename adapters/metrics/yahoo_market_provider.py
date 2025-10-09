@@ -16,6 +16,7 @@ from shared.config import settings
 
 
 class YahooMarketDataAdapter(MarketDataPort):
+
     def get_adjusted_close(
         self,
         symbol: str,
