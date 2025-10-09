@@ -15,7 +15,8 @@ from shared.logging import setup_logging
 from loguru import logger
 
 from api.routers.fetch_data import router as fetch_data_router
-from api.routers.agent import router as agent_router
+
+# from api.routers.agent import router as agent_router
 
 
 # Context var to store a per-request id (safe for async)
@@ -67,7 +68,6 @@ def create_app() -> FastAPI:
         )
         return response
 
-    # 4) health endpoint (kept simple)
     @app.get("/healthz")  # type: ignore[misc]
     async def healthz() -> dict[str, str]:
         logger.info("health check")
@@ -75,9 +75,8 @@ def create_app() -> FastAPI:
 
     # 5) mount your routers
     app.include_router(fetch_data_router)
-    app.include_router(agent_router)
-
-    # when you add the agent router later: app.include_router(agent_router)
+    # app.include_router(agent_router)
+    # agent router later: app.include_router(agent_router)
 
     logger.info("application startup complete")
     return app
