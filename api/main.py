@@ -9,10 +9,11 @@ from starlette.requests import Request
 from starlette.responses import Response
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from loguru import logger
+
 
 from shared.config import settings
 from shared.logging import setup_logging
-from loguru import logger
 
 from api.routers.fetch_data import router as fetch_data_router
 
@@ -53,7 +54,7 @@ def create_app() -> FastAPI:
             # log unhandled exceptions with the request id
             elapsed_ms = (time.perf_counter() - start) * 1000
             logger.bind(request_id=rid).exception(
-                f"✖ {request.method} {request.url.path} failed in {elapsed_ms:.1f} ms"
+                f" {request.method} {request.url.path} failed in {elapsed_ms:.1f} ms"
             )
             raise
         finally:
